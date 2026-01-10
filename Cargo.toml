@@ -1,9 +1,14 @@
 [package]
-name = "ecos_ssc1"
+name = "ecos-ssc1"
 version = "0.1.0"
 edition = "2024"
 description = "Rust SDK for ECOS StarrySky C1"  # todo: to support all. see include/README
 authors = ["heke1228(Leo Cheng) <chengkelfanke@gmail.com>"]
+repository = "git@github.com:ECOS-C1-SDK4Heke/ecos-ssc1.git"  # temp - 等待被收编...
+license = "MIT OR Apache-2.0"
+documentation = "https://docs.rs/ecos-ssc1"
+keywords = ["embedded", "riscv", "starrysky", "ecos"]
+categories = ["embedded"]
 
 include = [
     ".cargo/config.toml",
@@ -15,10 +20,12 @@ include = [
     "macros/**/*",
 ]
 
+build = "build.rs"
+
 [dependencies]
 cty = "0.2"
 volatile = "0.6"
-macros = { path = "./macros" }
+macros = { package = "ecos-macros", version = "0.1" }
 
 [build-dependencies]
 bindgen = "0.72"
