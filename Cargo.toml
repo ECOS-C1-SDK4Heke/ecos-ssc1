@@ -1,0 +1,25 @@
+[package]
+name = "ecos_ssc1"
+version = "0.1.0"
+edition = "2024"
+description = "Rust SDK for ECOS StarrySky C1"  # todo: to support all. see include/README
+authors = ["heke1228(Leo Cheng) <chengkelfanke@gmail.com>"]
+
+include = [
+    ".cargo/config.toml",
+    "Cargo.toml",
+    "build.rs",
+    "README.md",
+    "src/**/*.rs",
+    "include/**/*",
+    "macros/**/*",
+]
+
+[dependencies]
+cty = "0.2"
+volatile = "0.6"
+macros = { path = "./macros" }
+
+[build-dependencies]
+bindgen = "0.72"
+cc = "1.2"

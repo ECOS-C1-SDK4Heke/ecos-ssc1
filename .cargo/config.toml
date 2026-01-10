@@ -1,0 +1,18 @@
+[build]
+target = "riscv32im-unknown-none-elf"
+
+[target.riscv32im-unknown-none-elf]
+linker = "riscv64-unknown-elf-gcc"
+rustflags = [
+    "-C", "link-arg=-mabi=ilp32",
+    "-C", "link-arg=-march=rv32im",
+    "-C", "link-arg=-ffreestanding",
+    "-C", "link-arg=-nostdlib",
+    "-C", "panic=abort",
+    "-C", "opt-level=s",
+    "-C", "link-arg=-Wl,--gc-sections",
+    "-C", "link-arg=-nostartfiles",
+]
+
+[publish]
+registry = "crates.io"
