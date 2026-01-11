@@ -1,11 +1,17 @@
 [package]
 name = "ecos-macros"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = ["heke1228 <chengkelfanke@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "Rust SDK Macros for ECOS StarrySky C1"
 documentation = "https://docs.rs/ecos-macros"
+repository = "https://github.com/ECOS-C1-SDK4Heke/ecos-ssc1.git"
+
+[features]
+default = []
+all = ["alloc"]
+alloc = []
 
 [lib]
 proc-macro = true

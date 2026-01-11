@@ -3,7 +3,7 @@ use crate::bindings;
 pub struct Timer;
 
 impl Timer {
-    pub fn init() {
+    pub fn init_tick() {
         unsafe {
             bindings::sys_tick_init();
         }

@@ -1,6 +1,6 @@
 [package]
 name = "ecos-ssc1"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Rust SDK for ECOS StarrySky C1"  # todo: to support all. see include/README
 authors = ["heke1228(Leo Cheng) <chengkelfanke@gmail.com>"]
@@ -22,10 +22,25 @@ include = [
 
 build = "build.rs"
 
+[features]
+default = []
+all = ["alloc"]
+alloc = ["dep:buddy_system_allocator", "macros/alloc"]
+
 [dependencies]
 cty = "0.2"
 volatile = "0.6"
-macros = { package = "ecos-macros", version = "0.1" }
+# macros = { package = "ecos-macros", version = "0.1" }
+macros = { package = "ecos-macros", path = "./macros" }
+tock-registers = "0.10"
+riscv = "0.16"
+
+[dependencies.buddy_system_allocator]
+git = "https://github.com/Lfan-ke/buddy_system_allocator.git"
+rev = "1a0458a"
+default-features = false
+features = ["alloc", "soft_atomic_spin_single_core", "use_spin"]
+optional = true
 
 [build-dependencies]
 bindgen = "0.72"

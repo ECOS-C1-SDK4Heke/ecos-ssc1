@@ -2,11 +2,24 @@
 
 pub mod gpio;
 pub mod panic;
+pub mod qspi;
 pub mod timer;
 pub mod uart;
 
+pub mod features;
+
+#[cfg(feature = "alloc")]
+pub use features::alloc as allocator;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 pub use macros::{ecos_main, rust_main};
 
+pub use crate::qspi::{
+    InterruptConfig, Qspi, QspiConfig, QspiError, QspiFlash, QspiMode, QspiMutex, deinit_qspi,
+    get_qspi, global_qspi, init_qspi,
+};
 pub use crate::{gpio::Gpio, gpio::GpioPin, timer::Timer, uart::Uart};
 
 #[macro_export]
@@ -86,8 +99,9 @@ pub mod bindings {
         0x03004020 as *mut volatile::VolatilePtr<u32>;
 
     /* ========== QSPI 接口寄存器 ========== */
+    pub const REG_QSPI_0_BASE: u32 = 0x03007000;
     pub const REG_QSPI_0_STATUS: *mut volatile::VolatilePtr<u32> =
-        0x03007000 as *mut volatile::VolatilePtr<u32>;
+        REG_QSPI_0_BASE as *mut volatile::VolatilePtr<u32>;
     pub const REG_QSPI_0_CLKDIV: *mut volatile::VolatilePtr<u32> =
         0x03007004 as *mut volatile::VolatilePtr<u32>;
     pub const REG_QSPI_0_CMD: *mut volatile::VolatilePtr<u32> =
