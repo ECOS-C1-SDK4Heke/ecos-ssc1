@@ -67,7 +67,7 @@ fn scan_directory(dir: &Path, include_dirs: &mut Vec<PathBuf>) {
 }
 
 fn generate_bindings(_sdk_path: &Path, include_dirs: &[PathBuf]) {
-    let mut clang_args = vec!["-mabi=ilp32".to_string(), "-march=rv32im".to_string()];
+    let mut clang_args = vec!["-mabi=ilp32".to_string(), "-march=rv32imac".to_string()];
 
     for dir in include_dirs {
         if dir.exists() {

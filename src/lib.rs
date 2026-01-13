@@ -1,4 +1,5 @@
 #![no_std]
+#![doc = include_str!("../README.md")]
 
 pub mod gpio;
 pub mod panic;
@@ -13,6 +14,17 @@ pub use features::alloc as allocator;
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
+
+#[cfg(feature = "rand")]
+pub mod rand {
+    pub use rand::*;
+}
+
+#[cfg(feature = "log")]
+pub use features::log;
+
+#[cfg(feature = "log")]
+pub use crate::__log as log;
 
 pub use macros::{ecos_main, rust_main};
 
@@ -159,3 +171,6 @@ unsafe extern "C" {
 #[unsafe(no_mangle)]
 #[used]
 pub static _start: unsafe extern "C" fn() = start;
+
+#[cfg(feature = "hashbrown")]
+pub use hashbrown;

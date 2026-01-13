@@ -1,12 +1,16 @@
 extern crate proc_macro;
 
+mod prelude;
+
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::{ToTokens, quote};
 use std::collections::HashMap;
 use syn::{
     ItemFn, Meta, ReturnType, Token, parse::Parser, parse_macro_input, punctuated::Punctuated,
 };
+
+use crate::prelude::generate_prelude_imports;
 
 /// 直接执行版本：
 ///
@@ -19,6 +23,16 @@ pub fn rust_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
     if !input_fn.sig.inputs.is_empty() {
         panic!("Function marked with #[rust_main] must have no parameters");
     }
+
+    let docs: Vec<TokenStream2> = input_fn
+        .attrs
+        .iter()
+        .filter(|attr| attr.path().is_ident("doc"))
+        .map(|attr| {
+            let attr_tokens = attr.to_token_stream();
+            quote! { #attr_tokens }
+        })
+        .collect();
 
     match &input_fn.sig.output {
         syn::ReturnType::Default => panic!("Function marked with #[rust_main] must return -> !"),
@@ -33,6 +47,20 @@ pub fn rust_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
 
     let fn_block = &input_fn.block;
 
+    let prelude = generate_prelude_imports();
+
+    let dev_debug = if cfg!(feature = "dev") {
+        quote! {
+            loop {
+                if '\n' as u8 == ecos_ssc1::Uart::read_byte_blocking() {
+                    break;
+                }
+            }
+        }
+    } else {
+        quote! {}
+    };
+
     let init_alloc = if cfg!(feature = "alloc") {
         quote! {
             unsafe {
@@ -44,8 +72,13 @@ pub fn rust_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
     };
 
     let expanded = quote! {
+        #prelude
+
+        #(#docs)*
         #[unsafe(no_mangle)]
         pub extern "C" fn main() -> ! {
+            #dev_debug
+
             #init_alloc
             #fn_block
         }
@@ -61,6 +94,7 @@ pub fn rust_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// 可用选项：
 ///     - no_uart
+///     - no_gpio
 ///     - tick
 ///     - on == 一键开启all
 ///     - off == 一键关闭all == rust_main
@@ -80,6 +114,16 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
         panic!("Function marked with #[ecos_main] must have no parameters");
     }
 
+    let docs: Vec<TokenStream2> = input_fn
+        .attrs
+        .iter()
+        .filter(|attr| attr.path().is_ident("doc"))
+        .map(|attr| {
+            let attr_tokens = attr.to_token_stream();
+            quote! { #attr_tokens }
+        })
+        .collect();
+
     match &input_fn.sig.output {
         ReturnType::Default => panic!("Function marked with #[ecos_main] must return -> !"),
         ReturnType::Type(_, ty) => {
@@ -97,12 +141,39 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     // 注册到off的：默认会初始化（default_enabled = true），禁用就得：no_xxx
     pm.register("uart", true, || {
-        quote! { unsafe { ::ecos_ssc1::bindings::sys_uart_init(); } }
+        if !cfg!(feature = "log") {
+            quote! {
+                unsafe {
+                    ::ecos_ssc1::bindings::sys_uart_init();
+                }
+            }
+        } else {
+            quote! {}
+        }
     });
 
     // 注册到on的：默认不会初始化（default_enabled = false），开启就得：xxx
     pm.register("tick", false, || {
-        quote! { unsafe { ::ecos_ssc1::bindings::sys_tick_init(); } }
+        if !cfg!(feature = "log") {
+            quote! {
+                unsafe {
+                    ::ecos_ssc1::bindings::sys_tick_init();
+                }
+            }
+        } else {
+            quote! {}
+        }
+    });
+
+    // 因为编译优化的原因，不调用一个函数对应的C就直接跳过了，导致其他函数找不到
+    pm.register("gpio", true, || {
+        quote! { unsafe { ::ecos_ssc1::bindings::gpio_config(
+            // 16位全部输出
+            &::ecos_ssc1::bindings::gpio_config_t {
+                pin_bit_mask: 0xFFFF,
+                mode: ::ecos_ssc1::bindings::gpio_mode_t_GPIO_MODE_OUTPUT,
+            }
+        ); } }
     });
 
     // on预设：开启所有注册到on的（默认不会初始化的）
@@ -115,6 +186,7 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
     pm.add_preset("off", |pm| {
         // 有 off 标签禁用所有 default_enabled = true 的外设（注册到off的）
         pm.disable("uart");
+        pm.disable("gpio");
     });
 
     // ================ 处理传入的宏选项 ================
@@ -132,7 +204,33 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     }
 
-    let init_code = pm.generate_init_code();
+    let init_pm = pm.generate_init_code();
+
+    let dev_debug = if cfg!(feature = "dev") {
+        quote! {
+            loop {
+                if '\n' as u8 == ecos_ssc1::Uart::read_byte_blocking() {
+                    break;
+                }
+            }
+        }
+    } else {
+        quote! {}
+    };
+
+    let init_log = if cfg!(feature = "log") {
+        quote! {
+            unsafe {
+                // 启用log由于要打印时间戳以及初始化uart，附带开启tick ...
+                ::ecos_ssc1::bindings::sys_uart_init();
+                println!("asdsadas");
+                ::ecos_ssc1::bindings::sys_tick_init();
+                ::ecos_ssc1::features::log::init_logger();
+            }
+        }
+    } else {
+        quote! {}
+    };
 
     let init_alloc = if cfg!(feature = "alloc") {
         quote! {
@@ -144,10 +242,19 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
         quote! {}
     };
 
+    let prelude = generate_prelude_imports();
+
     let expanded = quote! {
+        #prelude
+
+        #(#docs)*
         #[unsafe(no_mangle)]
         pub extern "C" fn main() -> ! {
-            #init_code
+            #init_pm
+            #init_log
+
+            #dev_debug
+
             #init_alloc
             #fn_block
         }

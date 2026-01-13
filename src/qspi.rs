@@ -131,7 +131,7 @@ pub struct QspiConfig {
 impl Default for QspiConfig {
     fn default() -> Self {
         Self {
-            clkdiv: 1,
+            clkdiv: 0,
             dummy_cycles: 0,
             interrupt_config: None,
         }
@@ -226,7 +226,7 @@ impl Qspi {
 
     /// 设置传输长度 - 允许 8bit 16bit 32bit
     fn set_transfer_length(&mut self, bits: u32) {
-        let len_value = bits << 20;
+        let len_value = bits << 16;
         self.regs.len.set(len_value);
     }
 

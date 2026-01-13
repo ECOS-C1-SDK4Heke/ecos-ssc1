@@ -9,9 +9,15 @@ documentation = "https://docs.rs/ecos-macros"
 repository = "https://github.com/ECOS-C1-SDK4Heke/ecos-ssc1.git"
 
 [features]
-default = []
-all = ["alloc"]
+default = ["prelude-print"]
+all = ["alloc", "log", "prelude", "prelude-print", "prelude-hashbrown"]
+
 alloc = []
+log = []
+dev = []
+prelude = []
+prelude-print = []
+prelude-hashbrown = []
 
 [lib]
 proc-macro = true

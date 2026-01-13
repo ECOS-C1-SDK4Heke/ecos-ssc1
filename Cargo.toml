@@ -23,9 +23,23 @@ include = [
 build = "build.rs"
 
 [features]
-default = []
-all = ["alloc"]
-alloc = ["dep:buddy_system_allocator", "macros/alloc"]
+default = ["prelude-print", "prelude", "alloc"]
+dev = ["macros/dev", "alloc-auto-test", "alloc-debug-trace"]
+all = ["alloc", "rand", "prelude", "prelude-print", "hashbrown", "log-colored", "dev"]
+
+prelude = ["macros/prelude"]
+prelude-print = ["macros/prelude-print"]
+
+alloc = ["macros/alloc"]
+alloc-auto-test = ["alloc", "rand"]
+alloc-debug-trace = ["alloc"]
+
+rand = ["dep:rand"]
+
+log = ["macros/log"]
+log-colored = ["log"]
+
+hashbrown = ["dep:hashbrown", "macros/prelude-hashbrown"]
 
 [dependencies]
 cty = "0.2"
@@ -34,13 +48,8 @@ volatile = "0.6"
 macros = { package = "ecos-macros", path = "./macros" }
 tock-registers = "0.10"
 riscv = "0.16"
-
-[dependencies.buddy_system_allocator]
-git = "https://github.com/Lfan-ke/buddy_system_allocator.git"
-rev = "1a0458a"
-default-features = false
-features = ["alloc", "soft_atomic_spin_single_core", "use_spin"]
-optional = true
+rand = { version = "0.9", default-features = false, features = ["small_rng"], optional = true }
+hashbrown = { version = "0.16", optional = true  }
 
 [build-dependencies]
 bindgen = "0.72"
