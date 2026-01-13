@@ -44,8 +44,7 @@ hashbrown = ["dep:hashbrown", "macros/prelude-hashbrown"]
 [dependencies]
 cty = "0.2"
 volatile = "0.6"
-# macros = { package = "ecos-macros", version = "0.1" }
-macros = { package = "ecos-macros", path = "./macros" }
+macros = { package = "ecos-macros", version = "0.1" }
 tock-registers = "0.10"
 riscv = "0.16"
 rand = { version = "0.9", default-features = false, features = ["small_rng"], optional = true }
