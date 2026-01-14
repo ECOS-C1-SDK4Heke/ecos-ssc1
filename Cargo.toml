@@ -39,7 +39,7 @@ rand = ["dep:rand"]
 log = ["macros/log"]
 log-colored = ["log"]
 
-hashbrown = ["dep:hashbrown", "macros/prelude-hashbrown"]
+hashbrown = ["dep:hashbrown", "macros/hashbrown"]
 
 [dependencies]
 cty = "0.2"

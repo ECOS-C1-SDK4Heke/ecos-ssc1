@@ -43,7 +43,7 @@ pub fn generate_prelude_imports() -> TokenStream2 {
         });
     }
 
-    if cfg!(feature = "prelude-hashbrown") {
+    if cfg!(feature = "hashbrown") && cfg!(feature = "hashbrown") {
         imports.extend(quote! {
             #[allow(unused_imports)]
             pub use ::ecos_ssc1::hashbrown::{
