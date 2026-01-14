@@ -25,7 +25,7 @@ build = "build.rs"
 [features]
 default = ["prelude-print", "prelude", "alloc"]
 dev = ["macros/dev", "alloc-auto-test", "alloc-debug-trace"]
-all = ["alloc", "rand", "prelude", "prelude-print", "hashbrown", "log-colored", "dev"]
+all = ["alloc", "rand", "prelude", "prelude-print", "hashbrown", "log-colored"]
 
 prelude = ["macros/prelude"]
 prelude-print = ["macros/prelude-print"]
