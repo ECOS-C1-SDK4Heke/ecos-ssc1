@@ -38,7 +38,7 @@ pub fn generate_prelude_imports() -> TokenStream2 {
                 rc::Rc,
                 string::{String, ToString},
                 sync::Arc,
-                vec::{self, Vec},
+                vec::Vec, vec,
             };
         });
     }

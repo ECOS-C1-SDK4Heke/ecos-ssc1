@@ -1,6 +1,6 @@
 [package]
 name = "ecos-macros"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2024"
 authors = ["heke1228 <chengkelfanke@gmail.com>"]
 license = "MIT OR Apache-2.0"
@@ -12,11 +12,11 @@ repository = "https://github.com/ECOS-C1-SDK4Heke/ecos-ssc1.git"
 default = ["prelude-print"]
 all = ["alloc", "log", "prelude", "prelude-print", "hashbrown"]
 
-alloc = []
 log = []
 dev = []
 prelude = []
 prelude-print = []
+alloc = []
 hashbrown = []
 
 [lib]

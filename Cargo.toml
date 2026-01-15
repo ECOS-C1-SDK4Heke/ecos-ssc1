@@ -1,6 +1,6 @@
 [package]
 name = "ecos-ssc1"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 description = "Rust SDK for ECOS StarrySky C1"  # todo: to support all. see include/README
 authors = ["heke1228(Leo Cheng) <chengkelfanke@gmail.com>"]
@@ -24,11 +24,13 @@ build = "build.rs"
 
 [features]
 default = ["prelude-print", "prelude", "alloc"]
-dev = ["macros/dev", "alloc-auto-test", "alloc-debug-trace"]
+dev = ["macros/dev"]
 all = ["alloc", "rand", "prelude", "prelude-print", "hashbrown", "log-colored"]
 
 prelude = ["macros/prelude"]
 prelude-print = ["macros/prelude-print"]
+
+panic-trace = []
 
 alloc = ["macros/alloc"]
 alloc-auto-test = ["alloc", "rand"]
@@ -44,7 +46,7 @@ hashbrown = ["dep:hashbrown", "macros/hashbrown"]
 [dependencies]
 cty = "0.2"
 volatile = "0.6"
-macros = { package = "ecos-macros", version = "0.1" }
+macros = { package = "ecos-macros", path = "./macros" }
 tock-registers = "0.10"
 riscv = "0.16"
 rand = { version = "0.9", default-features = false, features = ["small_rng"], optional = true }

@@ -28,9 +28,9 @@ pub use crate::__log as log;
 
 pub use macros::{ecos_main, rust_main};
 
-pub use crate::qspi::{
-    InterruptConfig, Qspi, QspiConfig, QspiError, QspiFlash, QspiMode, QspiMutex, deinit_qspi,
-    get_qspi, global_qspi, init_qspi,
+pub use self::qspi::{
+    Qspi, QspiConfig, QspiError, get_qspi, init_qspi, write_bytes, write_u8, write_u16, write_u32,
+    write_words,
 };
 pub use crate::{gpio::Gpio, gpio::GpioPin, timer::Timer, uart::Uart};
 

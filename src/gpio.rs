@@ -41,7 +41,7 @@ pub struct GpioPin;
 
 const PIN_TO_GPIO: [u32; 16] = [9, 5, 8, 0, 7, 1, 6, 10, 11, 12, 13, 14, 15, 2, 3, 4];
 
-const GPIO_TO_PIN: [u32; 16] = [4, 14, 15, 16, 2, 6, 5, 3, 1, 8, 9, 10, 11, 12, 13, 7];
+const GPIO_TO_PIN: [u32; 16] = [4, 6, 14, 15, 16, 2, 7, 5, 3, 1, 8, 9, 10, 11, 12, 13];
 
 impl GpioPin {
     pub fn pin_to_gpio(pin: u32) -> Option<u32> {

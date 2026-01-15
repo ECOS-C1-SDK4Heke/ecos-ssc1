@@ -96,6 +96,7 @@ pub fn rust_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
 ///     - no_uart
 ///     - no_gpio
 ///     - tick
+///     - qspi || qspi(clkdiv=0) || qspi(0)
 ///     - on == 一键开启all
 ///     - off == 一键关闭all == rust_main
 ///
@@ -112,6 +113,33 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
 
     if !input_fn.sig.inputs.is_empty() {
         panic!("Function marked with #[ecos_main] must have no parameters");
+    }
+
+    let mut qspi_clkdiv: Option<u32> = None;
+
+    for arg in &attr_args {
+        match arg {
+            Meta::Path(path) => {
+                // 简单标识符，如 qspi
+                if let Some(ident) = path.get_ident() {
+                    if ident == "qspi" {
+                        qspi_clkdiv = Some(0);
+                    }
+                }
+            }
+            Meta::List(list) => {
+                // 带括号的参数，如 qspi(clkdiv=2) 或 qspi(2)
+                if let Some(ident) = list.path.get_ident() {
+                    if ident == "qspi" {
+                        let args = parse_qspi_args(&list.tokens);
+                        qspi_clkdiv = Some(args.clkdiv);
+                    }
+                }
+            }
+            Meta::NameValue(_) => {
+                panic!("ecos_main does not support name=value syntax for qspi");
+            }
+        }
     }
 
     let docs: Vec<TokenStream2> = input_fn
@@ -165,6 +193,24 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
         }
     });
 
+    pm.register("qspi", false, {
+        let clkdiv = qspi_clkdiv;
+        move || {
+            if clkdiv.is_some() {
+                let clkdiv_val = clkdiv.unwrap_or(0);
+                quote! {
+                    unsafe {
+                        ::ecos_ssc1::bindings::qspi_init(::ecos_ssc1::bindings::qspi_config_t {
+                            clkdiv: #clkdiv_val
+                        });
+                    }
+                }
+            } else {
+                quote! {}
+            }
+        }
+    });
+
     // 因为编译优化的原因，不调用一个函数对应的C就直接跳过了，导致其他函数找不到
     pm.register("gpio", true, || {
         quote! { unsafe { ::ecos_ssc1::bindings::gpio_config(
@@ -180,6 +226,7 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
     pm.add_preset("on", |pm| {
         // 有 on 标签就开启所有 default_enabled = false 的外设（注册到on的）
         pm.enable("tick");
+        pm.enable("qspi");
     });
 
     // off预设：禁用所有注册到off的（默认会初始化的）
@@ -359,4 +406,48 @@ impl PeripheralManager {
 struct PeripheralConfig {
     enabled: bool,
     init_fn: Box<dyn Fn() -> TokenStream2>,
+}
+
+fn parse_qspi_args(tokens: &TokenStream2) -> QspiArgs {
+    let mut args = QspiArgs { clkdiv: 0 };
+
+    if let Ok(value) = syn::parse::<syn::LitInt>(tokens.clone().into()) {
+        args.clkdiv = value.base10_parse::<u32>().unwrap_or(0);
+        return args;
+    }
+
+    let parser = Punctuated::<syn::Meta, Token![,]>::parse_terminated;
+    if let Ok(meta_list) = parser.parse(tokens.clone().into()) {
+        for meta in meta_list {
+            match meta {
+                syn::Meta::NameValue(nv) => {
+                    if let Some(ident) = nv.path.get_ident() {
+                        if ident == "clkdiv" {
+                            if let syn::Expr::Lit(expr_lit) = &nv.value {
+                                if let syn::Lit::Int(lit_int) = &expr_lit.lit {
+                                    args.clkdiv = lit_int.base10_parse::<u32>().unwrap_or(0);
+                                } else {
+                                    panic!("clkdiv must be an integer literal");
+                                }
+                            } else {
+                                panic!("clkdiv must be a literal");
+                            }
+                        } else {
+                            panic!("qspi only supports clkdiv parameter");
+                        }
+                    }
+                }
+                _ => {
+                    panic!("qspi only supports clkdiv=value syntax");
+                }
+            }
+        }
+        return args;
+    }
+
+    args
+}
+
+struct QspiArgs {
+    clkdiv: u32,
 }
