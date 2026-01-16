@@ -2,12 +2,14 @@
 #![doc = include_str!("../README.md")]
 
 pub mod gpio;
-pub mod panic;
 pub mod qspi;
 pub mod timer;
 pub mod uart;
 
 pub mod features;
+
+#[cfg(feature = "panic")]
+pub mod panic;
 
 #[cfg(feature = "alloc")]
 pub use features::alloc as allocator;

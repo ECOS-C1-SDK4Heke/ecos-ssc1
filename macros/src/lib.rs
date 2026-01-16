@@ -242,11 +242,30 @@ pub fn ecos_main(attr: TokenStream, item: TokenStream) -> TokenStream {
             Meta::Path(path) => {
                 if let Some(ident) = path.get_ident() {
                     let ident_str = ident.to_string();
+                    // 跳过之前已处理的 qspi
+                    if ident_str == "qspi" {
+                        continue;
+                    }
+
                     pm.process_option(&ident_str);
                 }
             }
-            Meta::List(_) | Meta::NameValue(_) => {
-                panic!("ecos_main only supports simple identifiers as options");
+            Meta::List(list) => {
+                // 只处理 qspi(...) 格式，其他列表格式不支持
+                if let Some(ident) = list.path.get_ident() {
+                    if ident != "qspi" {
+                        panic!(
+                            "ecos_main only supports qspi with parameters, other options must be simple identifiers"
+                        );
+                    }
+                } else {
+                    panic!(
+                        "ecos_main only supports simple identifiers as options or qspi(...) syntax"
+                    );
+                }
+            }
+            Meta::NameValue(_) => {
+                panic!("ecos_main does not support name=value syntax (except qspi(clkdiv=value))");
             }
         }
     }

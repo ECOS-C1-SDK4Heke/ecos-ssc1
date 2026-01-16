@@ -11,13 +11,20 @@ pub fn generate_prelude_imports() -> TokenStream2 {
                 any, arch, array, ascii, cell, char,
                 concat,
                 fmt::{self, Debug, Display, Formatter, Result as FmtResult, Write},
-                future,
+                future, ops::*,
                 hash::{BuildHasher, Hash, Hasher},
                 hint, iter::{self, DoubleEndedIterator, ExactSizeIterator, Extend, FromIterator, IntoIterator, Iterator},
                 marker::{self, Unpin},
-                mem, num,
+                mem, num, marker::*, iter::*,
+                default::*, cmp::*, clone::*,
                 slice, str, task, time,
+                option::Option::{self, *},
+                result::Result::{self, *},
+                convert::{*},
             };
+
+            #[allow(unused_imports)]
+            use core::prelude::rust_2024::derive;
 
             #[allow(unused_imports)]
             pub use core::{assert, assert_eq, assert_ne, debug_assert, debug_assert_eq, debug_assert_ne};
