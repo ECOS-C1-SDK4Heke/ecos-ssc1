@@ -16,5 +16,3 @@
 
 #include "st7735.h"
 #include "sgp30.h"
-
-#include "logo.h"
