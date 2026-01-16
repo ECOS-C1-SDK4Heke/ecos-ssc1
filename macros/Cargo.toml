@@ -18,6 +18,7 @@ prelude = []
 prelude-print = []
 alloc = []
 hashbrown = []
+rand = []
 
 [lib]
 proc-macro = true

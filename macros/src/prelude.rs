@@ -50,7 +50,7 @@ pub fn generate_prelude_imports() -> TokenStream2 {
         });
     }
 
-    if cfg!(feature = "hashbrown") && cfg!(feature = "hashbrown") {
+    if cfg!(feature = "hashbrown") && cfg!(feature = "prelude") {
         imports.extend(quote! {
             #[allow(unused_imports)]
             pub use ::ecos_ssc1::hashbrown::{
@@ -58,6 +58,13 @@ pub fn generate_prelude_imports() -> TokenStream2 {
                 hash_map::{self, Drain, IntoIter, Iter, IterMut, Keys, Values},
                 hash_set::{self, Difference, Intersection, Iter as SetIter, Union},
             };
+        });
+    }
+
+    if cfg!(feature = "rand") && cfg!(feature = "prelude") {
+        imports.extend(quote! {
+            #[allow(unused_imports)]
+            pub use ::ecos_ssc1::rand;
         });
     }
 

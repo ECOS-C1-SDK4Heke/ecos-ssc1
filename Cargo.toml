@@ -37,7 +37,7 @@ alloc = ["macros/alloc"]
 alloc-auto-test = ["alloc", "rand"]
 alloc-debug-trace = ["alloc"]
 
-rand = ["dep:rand"]
+rand = ["dep:rand", "macros/rand"]
 
 log = ["macros/log"]
 log-colored = ["log"]
