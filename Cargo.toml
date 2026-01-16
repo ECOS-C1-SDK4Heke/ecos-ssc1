@@ -47,7 +47,7 @@ hashbrown = ["dep:hashbrown", "macros/hashbrown"]
 [dependencies]
 cty = "0.2"
 volatile = "0.6"
-macros = { package = "ecos-macros", path = "./macros" }
+macros = { package = "ecos-macros", version = "0" }
 tock-registers = "0.10"
 riscv = "0.16"
 rand = { version = "0.9", default-features = false, features = ["small_rng"], optional = true }
